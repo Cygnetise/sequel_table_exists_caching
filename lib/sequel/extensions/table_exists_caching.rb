@@ -1,4 +1,5 @@
 # frozen-string-literal: true
+
 #
 # The table_exists_caching extension adds a few methods to Sequel::Database
 # that make it easy to dump information about database table_exists to a file,
@@ -46,17 +47,16 @@
 #
 # Related module: Sequel::TableExistsCaching
 
-#
 module Sequel
   module TableExistsCaching
     # Set table_exists cache to the empty hash.
     def self.extended(db)
       db.instance_variable_set(:@table_exists, {})
     end
-    
+
     # Dump the table_exists cache to the filename given in Marshal format.
     def dump_table_exists_cache(file)
-      File.open(file, 'wb'){|f| f.write(Marshal.dump(@table_exists))}
+      File.open(file, 'wb') { |f| f.write(Marshal.dump(@table_exists)) }
       nil
     end
 
@@ -82,16 +82,14 @@ module Sequel
     # If no options are provided and there is cached table_exists information for
     # the table, return the cached information instead of querying the
     # database.
-    def table_exists(table, opts=OPTS)
-      return super unless opts.empty?
-
+    def table_exists?(table)
       quoted_name = literal(table)
-      if v = Sequel.synchronize{@table_exists[quoted_name]}
+      if v = Sequel.synchronize { @table_exists[quoted_name] }
         return v
       end
 
       result = super
-      Sequel.synchronize{@table_exists[quoted_name] = result}
+      Sequel.synchronize { @table_exists[quoted_name] = result }
       result
     end
 
@@ -100,7 +98,7 @@ module Sequel
     # Remove the table_exists cache for the given schema name
     def remove_cached_schema(table)
       k = quote_schema_table(table)
-      Sequel.synchronize{@table_exists.delete(k)}
+      Sequel.synchronize { @table_exists.delete(k) }
       super
     end
   end
